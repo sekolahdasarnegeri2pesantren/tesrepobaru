@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tebak Emoji Mobile</title>
+<style>
+:root{--bg:#0b1020;--card:#151c30;--card2:#202a44;--text:#fff;--muted:#aeb8d0;--blue:#4f8cff;--green:#39d98a;--red:#ff5d73}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;min-height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+body{overflow-x:hidden}
+button,input{font:inherit}
+.app{min-height:100dvh;padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}
+.screen{width:100%;max-width:560px;margin:auto;min-height:calc(100dvh - 22px);display:flex;flex-direction:column}
+.top{display:flex;align-items:center;justify-content:space-between;height:48px;flex:none}
+h1{font-size:23px;margin:0}
+.score{background:var(--card);padding:6px 11px;border-radius:12px;text-align:center}
+.score small{display:block;color:var(--muted);font-size:10px}.score b{font-size:18px}
+.bar{height:6px;background:#29334d;border-radius:20px;margin:4px 0 8px;flex:none}.bar div{height:100%;background:var(--blue);width:0}
+.game{background:var(--card);border-radius:18px;padding:10px;display:flex;flex-direction:column;flex:1;min-height:0}
+.emoji{flex:1;min-height:180px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:clamp(58px,18vw,105px);line-height:1.2;user-select:none}
+.cat{height:20px;text-align:center;color:var(--muted);font-size:12px}
+.form{display:flex;gap:7px;margin-top:7px;flex:none}
+input{height:52px;min-width:0;flex:1;background:#0b1020;color:#fff;border:2px solid #35415f;border-radius:12px;padding:0 13px;outline:0}
+input:focus{border-color:var(--blue)}
+.answer{width:105px;height:52px;border:0;border-radius:12px;background:var(--blue);font-weight:800;color:#07101e}
+.hints{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:7px;flex:none}
+.hint{height:50px;background:var(--card2);color:#fff;border:1px solid #3b4969;border-radius:12px;font-size:12px;font-weight:700}
+.hint small{display:block;color:var(--muted);font-size:10px}.hint.used{opacity:.4}
+.feedback{min-height:22px;text-align:center;font-size:13px;font-weight:800;padding-top:4px}
+.good{color:var(--green)}.bad{color:var(--red)}
+.streak{text-align:center;color:var(--muted);font-size:12px;height:18px}
+.shake{animation:shake .25s}@keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.end{background:var(--card);border-radius:18px;padding:22px;text-align:center;margin-top:20px}
+.final{font-size:52px;font-weight:900}.stats{display:flex;justify-content:center;gap:30px;color:var(--muted);margin:12px 0 20px}.stats b{display:block;color:#fff;font-size:21px}
+.missed{text-align:left;padding:0;list-style:none}.missed li{background:var(--card2);padding:10px;border-radius:10px;margin:7px 0}.me{font-size:28px;margin-right:7px}
+.restart{width:100%;height:56px;border:0;border-radius:13px;background:var(--blue);font-weight:900}
+@media(max-height:650px){
+ .emoji{min-height:130px;font-size:clamp(52px,15vw,80px)}
+ .game{padding:7px}.hints{margin-top:5px}.hint{height:44px}.answer,input{height:48px}
+}
+</style>
+
+<style>
+/* MODE LANDSCAPE / HP DIMIRINGKAN */
+@media (orientation: landscape) and (max-height: 600px) {
+  .app {
+    padding: max(6px, env(safe-area-inset-top))
+             max(10px, env(safe-area-inset-right))
+             max(6px, env(safe-area-inset-bottom))
+             max(10px, env(safe-area-inset-left));
+  }
+  .screen {
+    max-width: 900px;
+    min-height: calc(100dvh - 12px);
+  }
+  .top { height: 38px; }
+  h1 { font-size: 19px; }
+  .score { padding: 4px 9px; }
+  .score small { font-size: 9px; }
+  .score b { font-size: 16px; }
+  .bar { margin: 2px 0 5px; height: 5px; }
+
+  .game {
+    display: grid;
+    grid-template-columns: 1fr minmax(330px, 420px);
+    grid-template-rows: 1fr auto auto auto;
+    column-gap: 14px;
+    padding: 8px;
+    border-radius: 14px;
+  }
+  .emoji {
+    grid-column: 1;
+    grid-row: 1 / 5;
+    min-height: 0;
+    font-size: clamp(55px, 12vh, 100px);
+  }
+  .cat {
+    grid-column: 2;
+    grid-row: 1;
+    height: 18px;
+  }
+  .form {
+    grid-column: 2;
+    grid-row: 2;
+    margin-top: 4px;
+  }
+  input, .answer { height: 48px; }
+  .hints {
+    grid-column: 2;
+    grid-row: 3;
+    margin-top: 5px;
+  }
+  .hint { height: 44px; }
+  .feedback {
+    grid-column: 2;
+    grid-row: 4;
+    min-height: 20px;
+    padding-top: 2px;
+  }
+  .streak {
+    position: absolute;
+    left: -9999px;
+  }
+}
+</style>
+
+</head>
+<body>
+<div class="app">
+<main class="screen" id="gameScreen">
+  <div class="top"><h1>🧩 Tebak Emoji</h1><div class="score"><small>SKOR</small><b id="score">0</b></div></div>
+  <div class="bar"><div id="progress"></div></div>
+  <section class="game" id="game">
+    <div class="emoji" id="emoji"></div>
+    <div class="cat" id="cat"></div>
+    <form class="form" id="form">
+      <input id="answer" type="text" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off" placeholder="Ketik jawaban...">
+      <button class="answer" type="submit">JAWAB</button>
+    </form>
+    <div class="hints">
+      <button class="hint" type="button" data-hint="length"><small>HINT 1</small>Jumlah huruf</button>
+      <button class="hint" type="button" data-hint="first"><small>HINT 2</small>Huruf pertama</button>
+      <button class="hint" type="button" data-hint="category"><small>HINT 3</small>Kategori</button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+    <div class="streak">🔥 Streak: <b id="streak">0</b></div>
+  </section>
+</main>
+
+<main class="screen" id="endScreen" hidden>
+<section class="end">
+<h1>🎉 Selesai!</h1>
+<div class="final" id="final">0</div>
+<div class="stats"><div><b id="best">0</b>Streak terbaik</div><div><b id="count">0</b>Tidak terjawab</div></div>
+<h3>Soal tidak terjawab</h3>
+<ul class="missed" id="missed"></ul>
+<button class="restart" id="restart">🔄 MAIN LAGI</button>
+</section>
+</main>
+</div>
+
+<script>
+const questions=[
+["🦁👑","The Lion King","Film"],["🕷️👨","Spider-Man","Film"],["🚢💔🧊","Titanic","Film"],
+["🦖🌴","Jurassic Park","Film"],["🐝","Lebah","Hewan"],["🐘","Gajah","Hewan"],
+["🦋","Kupu-kupu","Hewan"],["🐢","Kura-kura","Hewan"],["📱","Ponsel","Benda sehari-hari"],
+["☂️🌧️","Payung","Benda sehari-hari"],["🪥🦷","Sikat gigi","Benda sehari-hari"],
+["🔑🚪","Kunci","Benda sehari-hari"],["🕶️☀️","Kacamata hitam","Benda sehari-hari"],
+["🎒📚","Tas sekolah","Benda sehari-hari"],["⌚","Jam tangan","Benda sehari-hari"]
+];
+const $=id=>document.getElementById(id);
+let order=[],i=0,score=0,streak=0,best=0,hints=0,state={},missed=[];
+
+function shuffle(a){a=[...a];for(let x=a.length-1;x;x--){let y=Math.floor(Math.random()*(x+1));[a[x],a[y]]=[a[y],a[x]]}return a}
+function norm(s){return s.toLocaleLowerCase("id-ID").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[\p{P}\p{S}]/gu," ").replace(/\s+/g," ").trim()}
+function render(){
+ let q=order[i];$("emoji").textContent=q[0];$("cat").textContent="";$("answer").value="";
+ $("feedback").textContent="";$("feedback").className="feedback";
+ state={length:false,first:false,category:false};hints=0;
+ document.querySelectorAll(".hint").forEach(x=>x.classList.remove("used"));
+ $("progress").style.width=(i/15*100)+"%";
+}
+function submit(e){
+ e.preventDefault();let q=order[i];
+ if(norm($("answer").value)===norm(q[1])){
+   let pts=100-hints*25;score+=pts;streak++;best=Math.max(best,streak);
+   $("score").textContent=score;$("streak").textContent=streak;
+   $("feedback").textContent="✅ Benar! +"+pts+" poin";$("feedback").className="feedback good";
+   i++;setTimeout(()=>i>=15?finish():render(),450);
+ }else{
+   streak=0;$("streak").textContent=0;$("feedback").textContent="❌ Coba lagi!";
+   $("feedback").className="feedback bad";$("game").classList.remove("shake");void $("game").offsetWidth;$("game").classList.add("shake");
+ }
+}
+function hint(type){
+ if(state[type])return;state[type]=true;hints++;
+ document.querySelector('[data-hint="'+type+'"]').classList.add("used");
+ let q=order[i];
+ if(type==="length")$("feedback").textContent="💡 Jumlah huruf: "+q[1].replace(/[^\p{L}\p{N}]/gu,"").length;
+ if(type==="first")$("feedback").textContent="💡 Huruf pertama: "+q[1].replace(/[^\p{L}\p{N}]/u,"").charAt(0).toUpperCase();
+ if(type==="category")$("feedback").textContent="💡 Kategori: "+q[2];
+}
+function finish(){
+ $("gameScreen").hidden=true;$("endScreen").hidden=false;$("final").textContent=score;$("best").textContent=best;$("count").textContent=missed.length;
+ let ul=$("missed");ul.innerHTML="";
+ if(!missed.length){ul.innerHTML="<li>🏆 Semua soal terjawab!</li>";return}
+ missed.forEach(q=>ul.innerHTML+=`<li><span class="me">${q[0]}</span><b>${q[1]}</b><br><small>${q[2]}</small></li>`);
+}
+function start(){order=shuffle(questions);i=0;score=0;streak=0;best=0;missed=[];$("score").textContent=0;$("streak").textContent=0;$("gameScreen").hidden=false;$("endScreen").hidden=true;render()}
+$("form").addEventListener("submit",submit);
+document.querySelectorAll(".hint").forEach(b=>b.addEventListener("click",()=>hint(b.dataset.hint)));
+$("restart").addEventListener("click",start);
+
+/* Ketika keyboard HP muncul, fokus dibawa ke area atas agar input tidak tertutup. */
+$("answer").addEventListener("focus",()=>{
+ setTimeout(()=>{
+   const top=Math.max(8, window.visualViewport ? window.visualViewport.height*.04 : 20);
+   window.scrollTo({top:0,behavior:"smooth"});
+   $("answer").scrollIntoView({block:"center",behavior:"smooth"});
+ },150);
+});
+start();
+</script>
+</body>
+</html>
